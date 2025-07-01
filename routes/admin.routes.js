@@ -1,5 +1,4 @@
 // POST   /api/admin/login
-// GET    /api/admin/users                 View all users
 // GET    /api/admin/merchants             View all merchants
 // DELETE /api/admin/user/:id              Delete a user
 // DELETE /api/admin/merchant/:id          Delete a merchant
@@ -21,10 +20,6 @@ adminProtectedRoutes.get("/customers", controller.getAllCustomers);
 adminProtectedRoutes.delete("/customer/:id", controller.deleteCustomer);
 
 adminProtectedRoutes.delete("/merchant/:id", controller.deleteMerchant);
-
-adminProtectedRoutes.get("/users", (req, res) => {
-  res.send("View all users");
-});
 
 adminProtectedRoutes.get("/reports", (req, res) => {
   res.send("Admin reports");
