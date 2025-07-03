@@ -109,22 +109,30 @@ module.exports.addProduct = async (req, res) => {
   try {
     const { name, price, qty, merchantId } = req.body;
 
-    if (!name || !price || !qty || !merchantId)
+    if (!name || price == null || qty == null || !merchantId) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
+    }
+
+    if (isNaN(price) || isNaN(qty)) {
+      return res.status(400).json({
+        success: false,
+        message: "Price and quantity must be numbers",
+      });
+    }
 
     const newProduct = await Product.create({
       name,
-      price,
-      qty,
+      price: Number(price),
+      qty: Number(qty),
       merchantId,
     });
 
     res.status(200).json({
       success: true,
-      message: "Succesfully added product",
+      message: "Successfully added product",
       product: newProduct,
     });
   } catch (error) {
@@ -139,20 +147,18 @@ module.exports.addProduct = async (req, res) => {
 module.exports.editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-    const { name, price, qty } = req.query;
+    const { name, price, qty } = req.body;
 
     const updatedData = {};
+    if (name) updatedData.name = name;
+    if (price != null) updatedData.price = Number(price);
+    if (qty != null) updatedData.qty = Number(qty);
 
-    if (name) {
-      updatedData.name = name;
-    }
-
-    if (price) {
-      updatedData.price = price;
-    }
-
-    if (qty) {
-      updatedData.qty = qty;
+    if (Object.keys(updatedData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields provided for update",
+      });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -161,9 +167,16 @@ module.exports.editProduct = async (req, res) => {
       { new: true }
     );
 
+    if (!updatedProduct) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: "Updated Product",
+      message: "Updated product successfully",
       product: updatedProduct,
     });
   } catch (error) {
@@ -180,11 +193,12 @@ module.exports.deleteProduct = async (req, res) => {
     const productId = req.params.id;
     const deletedProduct = await Product.findByIdAndDelete(productId);
 
-    if (!deletedProduct)
-      return res.status(400).json({
+    if (!deletedProduct) {
+      return res.status(404).json({
         success: false,
         message: "Product not found",
       });
+    }
 
     res.status(200).json({
       success: true,

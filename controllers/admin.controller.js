@@ -1,7 +1,7 @@
 const Admin = require("../models/admin.model");
 const Merchant = require("../models/merchant.model");
 const Customer = require("../models/customer.model");
-
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 module.exports.login = async (req, res) => {
@@ -9,20 +9,19 @@ module.exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password)
-      return res.status.json({
+      return res.status(400).json({
         success: false,
         message: "Email and Password required",
       });
 
     const admin = await Admin.findOne({ email });
     if (!admin)
-      return res.status.json({
+      return res.status(404).json({
         success: false,
         message: "Admin not found",
       });
 
     const isMatched = await bcrypt.compare(password, admin.password);
-
     if (!isMatched)
       return res.status(400).json({
         success: false,
@@ -61,7 +60,7 @@ module.exports.login = async (req, res) => {
 
 module.exports.getAllMerchants = async (req, res) => {
   try {
-    const search = req.query.name;
+    const search = req.query.name || "";
     const words = search.split(" ");
 
     const regexConditions = words.map((word) => ({
@@ -72,7 +71,7 @@ module.exports.getAllMerchants = async (req, res) => {
       $and: regexConditions,
     });
 
-    if (!merchants)
+    if (merchants.length === 0)
       return res.status(404).json({
         success: false,
         message: "No merchants found",
@@ -93,7 +92,7 @@ module.exports.getAllMerchants = async (req, res) => {
 
 module.exports.getAllCustomers = async (req, res) => {
   try {
-    const search = req.query.name;
+    const search = req.query.name || "";
     const words = search.split(" ");
 
     const regexConditions = words.map((word) => ({
@@ -104,7 +103,7 @@ module.exports.getAllCustomers = async (req, res) => {
       $and: regexConditions,
     });
 
-    if (!customers)
+    if (customers.length === 0)
       return res.status(404).json({
         success: false,
         message: "No customers found",
@@ -134,7 +133,7 @@ module.exports.deleteCustomer = async (req, res) => {
         message: "Customer not found",
       });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Customer deleted successfully",
       customer,
@@ -158,7 +157,7 @@ module.exports.deleteMerchant = async (req, res) => {
         message: "Merchant not found",
       });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Merchant deleted successfully",
       data: merchant,

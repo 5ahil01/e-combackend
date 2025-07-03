@@ -118,20 +118,16 @@ module.exports.getProducts = async (req, res) => {
     }
 
     if (sort) {
-      // -price
       const order = sort.startsWith("-") ? -1 : 1;
       const field = sort.replace("-", "");
-
       sortOption[field] = order;
-      //sortOption object {price : -1}
     }
 
-    //Product.find({category : category }).sort({price : -1})
     const products = await Product.find(filter).sort(sortOption);
 
     res.status(200).json({
       success: true,
-      message: "Filter options received",
+      message: "Products retrieved successfully",
       products,
     });
   } catch (error) {
@@ -145,17 +141,17 @@ module.exports.getProducts = async (req, res) => {
 
 module.exports.viewCart = async (req, res) => {
   try {
-    const { customerId } = req.params.id;
+    const { id: customerId } = req.params;
 
     const customer = await Customer.findById(customerId);
 
     if (!customer)
       return res
         .status(404)
-        .json({ success: false, message: "Customer not found !" });
+        .json({ success: false, message: "Customer not found!" });
 
     res.status(200).json({
-      message: true,
+      success: true,
       message: "Customer cart found",
       cart: customer.cart,
     });
@@ -196,7 +192,7 @@ module.exports.addToCart = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: true,
+      success: false,
       message: "Server error",
       error: error.message,
     });
@@ -206,48 +202,44 @@ module.exports.addToCart = async (req, res) => {
 module.exports.updateCartQty = async (req, res) => {
   try {
     const customerId = req.user.id;
-    const { productId } = req.params.id;
-    const { action } = req.body; // inc or dec
-
-    //search for the customer using customer Id
+    const { productId } = req.params;
+    const { action } = req.body; // "inc" or "dec"
 
     const customer = await Customer.findById(customerId);
 
-    const itemToUpdate = customer.cart.find(
-      (item) => item.productId == productId
+    const itemToUpdate = customer.cart.items.find(
+      (item) => item.productId.toString() === productId
     );
 
-    if (!item)
+    if (!itemToUpdate) {
       return res.status(400).json({
         success: false,
         message: "Item not found in cart",
       });
-
-    if (action == "inc") {
-      itemToUpdate.qty += 1;
     }
 
-    if (action == "dec") {
+    if (action === "inc") {
+      itemToUpdate.qty += 1;
+    } else if (action === "dec") {
       itemToUpdate.qty -= 1;
-
       if (itemToUpdate.qty <= 0) {
         customer.cart.items = customer.cart.items.filter(
-          (item) => item.productId.toString() === productId
+          (item) => item.productId.toString() !== productId
         );
       }
     }
 
-    customer.cart.updateAt = Date.now();
+    customer.cart.updatedAt = Date.now();
     await customer.save();
 
     res.status(200).json({
       success: true,
-      message: "Item qty successfully updated ",
+      message: "Item quantity updated successfully",
       cart: customer.cart,
     });
   } catch (error) {
     res.status(500).json({
-      success: true,
+      success: false,
       message: "Server error",
       error: error.message,
     });

@@ -20,13 +20,11 @@ customerPublicRoutes.post("/login", controller.login);
 //Protected Routes
 customerProtectedRoutes.get("/products", controller.getProducts);
 
-customerProtectedRoutes.get("/cart", (req, res) => {
-  res.send("View cart");
-});
+customerProtectedRoutes.get("/cart/:id", controller.viewCart);
 
-customerProtectedRoutes.post("/cart", (req, res) => {
-  res.send("Add to cart");
-});
+customerProtectedRoutes.post("/cart/:id", controller.addToCart);
+
+customerProtectedRoutes.put("/updatecartqty/:id", controller.updateCartQty);
 
 customerProtectedRoutes.post("/order", (req, res) => {
   res.send("Order placed");
@@ -35,8 +33,6 @@ customerProtectedRoutes.post("/order", (req, res) => {
 customerProtectedRoutes.get("/orders", (req, res) => {
   res.send("Order history");
 });
-
-customerProtectedRoutes.put("/updatecartqty", controller.updateCartQty);
 
 module.exports = {
   customerProtectedRoutes,
