@@ -5,9 +5,9 @@ const Product = require("../models/product.model");
 
 module.exports.signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, address } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone || !address) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -27,6 +27,8 @@ module.exports.signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      phone,
+      address,
     });
 
     res.status(201).json({
@@ -135,6 +137,117 @@ module.exports.getProducts = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.viewCart = async (req, res) => {
+  try {
+    const { customerId } = req.params.id;
+
+    const customer = await Customer.findById(customerId);
+
+    if (!customer)
+      return res
+        .status(404)
+        .json({ success: false, message: "Customer not found !" });
+
+    res.status(200).json({
+      message: true,
+      message: "Customer cart found",
+      cart: customer.cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.addToCart = async (req, res) => {
+  try {
+    const customerId = req.params.id;
+    const { productId, qty } = req.body;
+
+    const customer = await Customer.findByIdAndUpdate(
+      customerId,
+      {
+        $addToSet: {
+          "cart.items": {
+            productId,
+            qty,
+          },
+        },
+        $set: {
+          "cart.updatedAt": new Date(),
+        },
+      },
+      { new: true }
+    ).populate("cart.items.productId");
+
+    res.status(200).json({
+      success: true,
+      message: "Product added to cart",
+      cart: customer.cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: true,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.updateCartQty = async (req, res) => {
+  try {
+    const customerId = req.user.id;
+    const { productId } = req.params.id;
+    const { action } = req.body; // inc or dec
+
+    //search for the customer using customer Id
+
+    const customer = await Customer.findById(customerId);
+
+    const itemToUpdate = customer.cart.find(
+      (item) => item.productId == productId
+    );
+
+    if (!item)
+      return res.status(400).json({
+        success: false,
+        message: "Item not found in cart",
+      });
+
+    if (action == "inc") {
+      itemToUpdate.qty += 1;
+    }
+
+    if (action == "dec") {
+      itemToUpdate.qty -= 1;
+
+      if (itemToUpdate.qty <= 0) {
+        customer.cart.items = customer.cart.items.filter(
+          (item) => item.productId.toString() === productId
+        );
+      }
+    }
+
+    customer.cart.updateAt = Date.now();
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Item qty successfully updated ",
+      cart: customer.cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: true,
       message: "Server error",
       error: error.message,
     });

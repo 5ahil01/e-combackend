@@ -36,6 +36,8 @@ customerProtectedRoutes.get("/orders", (req, res) => {
   res.send("Order history");
 });
 
+customerProtectedRoutes.put("/updatecartqty", controller.updateCartQty);
+
 module.exports = {
   customerProtectedRoutes,
   customerPublicRoutes,

@@ -23,6 +23,14 @@ app.use("/api/admin", auth, adminRoutes.adminProtectedRoutes);
 app.use("/api/customer", auth, customerRoutes.customerProtectedRoutes);
 app.use("/api/merchant", auth, merchantRoutes.merchantProtectedRoutes);
 
+//Not registered routes
+app.use((req, res) =>
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  })
+);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   dbConnect();

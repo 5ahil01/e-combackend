@@ -12,7 +12,7 @@ const controller = require("../controllers/admin.controller");
 // Public Routes
 adminPublicRoutes.post("/login", controller.login);
 
-// Protected Routes
+// Protected Routess
 adminProtectedRoutes.get("/merchants", controller.getAllMerchants);
 
 adminProtectedRoutes.get("/customers", controller.getAllCustomers);

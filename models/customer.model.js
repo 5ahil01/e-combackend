@@ -17,19 +17,35 @@ const customerSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
-  // phone: {
-  //   type: String,
-  //   required: false,
-  // },
-  // address: {
-  //   street: String,
-  //   city: String,
-  //   state: String,
-  //   zip: String,
-  // },
+  phone: {
+    type: String,
+    required: false,
+  },
+  address: {
+    type: String,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  cart: {
+    items: {
+      type: [
+        {
+          productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+          },
+          qty: Number,
+        },
+      ],
+      default: [],
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
 });
 
