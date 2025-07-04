@@ -17,15 +17,13 @@ merchantPublicRoutes.post("/signup", controller.signup);
 merchantPublicRoutes.post("/login", controller.login);
 
 //  Protected Routes
-merchantProtectedRoutes.post("/addproduct", controller.addProduct);
+merchantProtectedRoutes.post("/addproduct/:id", controller.addProduct);
 
 merchantProtectedRoutes.put("/products/:id", controller.editProduct);
 
 merchantProtectedRoutes.delete("/products/:id", controller.deleteProduct);
 
-merchantProtectedRoutes.get("/orders", (req, res) => {
-  res.send("View merchant orders");
-});
+merchantProtectedRoutes.get("/orders", controller.viewOrders);
 
 module.exports = {
   merchantPublicRoutes,

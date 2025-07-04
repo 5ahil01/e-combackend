@@ -1,5 +1,6 @@
 const Merchant = require("../models/merchant.model");
 const Product = require("../models/product.model");
+const Order = require("../models/order.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -107,7 +108,8 @@ module.exports.login = async (req, res) => {
 
 module.exports.addProduct = async (req, res) => {
   try {
-    const { name, price, qty, merchantId } = req.body;
+    const { id: merchantId } = req.params;
+    const { name, price, qty } = req.body;
 
     if (!name || price == null || qty == null || !merchantId) {
       return res.status(400).json({
@@ -204,6 +206,29 @@ module.exports.deleteProduct = async (req, res) => {
       success: true,
       message: "Deleted product successfully",
       product: deletedProduct,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.viewOrders = async (req, res) => {
+  try {
+    const { id: merchantId } = req.params;
+
+    //1. All merchant's product exists in products model
+    const products = await Product.find({ merchantId });
+    const productIds = products.map((product) => product._id);
+    const orders = await Order.find({ "items.productId": { $in: productIds } });
+
+    res.status(200).json({
+      success: true,
+      message: "Orders found successfully",
+      orders,
     });
   } catch (error) {
     res.status(500).json({

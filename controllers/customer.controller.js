@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Customer = require("../models/customer.model");
 const Product = require("../models/product.model");
+const Order = require("../models/order.model");
 
 module.exports.signup = async (req, res) => {
   try {
@@ -236,6 +237,100 @@ module.exports.updateCartQty = async (req, res) => {
       success: true,
       message: "Item quantity updated successfully",
       cart: customer.cart,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.placeOrder = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    const customer = await Customer.findById(customerId).populate(
+      "cart.items.productId"
+    );
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    const cartItems = customer.cart.items;
+
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cart is empty",
+      });
+    }
+
+    const orderItems = cartItems.map((item) => {
+      const product = item.productId;
+      return {
+        productId: product._id,
+        qty: item.qty,
+        price: product.price,
+      };
+    });
+
+    const totalAmount = orderItems.reduce(
+      (acc, item) => acc + item.qty * item.price,
+      0
+    );
+
+    const newOrder = await Order.create({
+      customerId,
+      items: orderItems,
+      totalAmount,
+      address: customer.address,
+      status: "pending",
+    });
+
+    // Clear cart
+    customer.cart.items = [];
+    customer.cart.updatedAt = new Date();
+    await customer.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      order: newOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.viewOrder = async (req, res) => {
+  try {
+    const { id: customerId } = req.params;
+
+    const order = await Order.findOne({ customerId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order found",
+      items: order.items,
+      totalAmount: order.totalAmount,
+      address: order.address,
     });
   } catch (error) {
     res.status(500).json({

@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
   qty: Number,
-  merchant: {
+  merchantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Merchant",
   },

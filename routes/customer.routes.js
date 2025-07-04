@@ -26,11 +26,9 @@ customerProtectedRoutes.post("/cart/:id", controller.addToCart);
 
 customerProtectedRoutes.put("/updatecartqty/:id", controller.updateCartQty);
 
-customerProtectedRoutes.post("/order", (req, res) => {
-  res.send("Order placed");
-});
+customerProtectedRoutes.post("/order/:id", controller.placeOrder);
 
-customerProtectedRoutes.get("/orders", (req, res) => {
+customerProtectedRoutes.get("/orders/:id", (req, res) => {
   res.send("Order history");
 });
 
