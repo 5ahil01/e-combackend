@@ -20,17 +20,19 @@ customerPublicRoutes.post("/login", controller.login);
 //Protected Routes
 customerProtectedRoutes.get("/products", controller.getProducts);
 
-customerProtectedRoutes.get("/cart/:id", controller.viewCart);
+customerProtectedRoutes.get("/cart", controller.viewCart);
 
-customerProtectedRoutes.post("/cart/:id", controller.addToCart);
+customerProtectedRoutes.post("/cart", controller.addToCart);
 
-customerProtectedRoutes.put("/updatecartqty/:id", controller.updateCartQty);
-
-customerProtectedRoutes.post("/order/:id", controller.placeOrder);
-
-customerProtectedRoutes.get("/orders/:id", (req, res) => {
-  res.send("Order history");
+customerProtectedRoutes.delete("/cart", (req, re) => {
+  res.json({ msg: "Deleted product" });
 });
+
+customerProtectedRoutes.put("/updatecartqty", controller.updateCartQty);
+
+customerProtectedRoutes.post("/order", controller.placeOrder);
+
+customerProtectedRoutes.get("/orders", controller.viewOrder);
 
 module.exports = {
   customerProtectedRoutes,

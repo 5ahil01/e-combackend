@@ -70,11 +70,9 @@ module.exports.login = async (req, res) => {
       });
     }
 
-    const accessToken = jwt.sign(
-      { customerId: customer._id },
-      process.env.SECRET_KEY,
-      { expiresIn: "1d" }
-    );
+    const accessToken = jwt.sign({ id: customer._id }, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
@@ -142,7 +140,7 @@ module.exports.getProducts = async (req, res) => {
 
 module.exports.viewCart = async (req, res) => {
   try {
-    const { id: customerId } = req.params;
+    const customerId = req.id;
 
     const customer = await Customer.findById(customerId);
 
@@ -167,7 +165,8 @@ module.exports.viewCart = async (req, res) => {
 
 module.exports.addToCart = async (req, res) => {
   try {
-    const customerId = req.params.id;
+    const customerId = req.id;
+    console.log(customerId);
     const { productId, qty } = req.body;
 
     const customer = await Customer.findByIdAndUpdate(
@@ -202,7 +201,7 @@ module.exports.addToCart = async (req, res) => {
 
 module.exports.updateCartQty = async (req, res) => {
   try {
-    const customerId = req.user.id;
+    const customerId = req.id;
     const { productId } = req.params;
     const { action } = req.body; // "inc" or "dec"
 
@@ -247,9 +246,53 @@ module.exports.updateCartQty = async (req, res) => {
   }
 };
 
+module.exports.deleteProduct = async (req, res) => {
+  try {
+    const customerId = req.id;
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID is required",
+      });
+    }
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    const cartItems = customer.cart.items;
+
+    const updatedItems = cartItems.filter(
+      (item) => item.productId.toString() !== productId
+    );
+
+    customer.cart.items = updatedItems;
+    customer.cart.updatedAt = new Date();
+
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully deleted product",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports.placeOrder = async (req, res) => {
   try {
-    const { customerId } = req.params;
+    const customerId = req.id;
 
     const customer = await Customer.findById(customerId).populate(
       "cart.items.productId"
@@ -314,7 +357,7 @@ module.exports.placeOrder = async (req, res) => {
 
 module.exports.viewOrder = async (req, res) => {
   try {
-    const { id: customerId } = req.params;
+    const customerId = req.id;
 
     const order = await Order.findOne({ customerId });
 

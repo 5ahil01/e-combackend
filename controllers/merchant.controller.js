@@ -75,11 +75,9 @@ module.exports.login = async (req, res) => {
       });
     }
 
-    const accessToken = jwt.sign(
-      { merchantId: merchant._id },
-      process.env.SECRET_KEY,
-      { expiresIn: "1d" }
-    );
+    const accessToken = jwt.sign({ id: merchant._id }, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
@@ -108,7 +106,7 @@ module.exports.login = async (req, res) => {
 
 module.exports.addProduct = async (req, res) => {
   try {
-    const { id: merchantId } = req.params;
+    const merchantId = req.id;
     const { name, price, qty } = req.body;
 
     if (!name || price == null || qty == null || !merchantId) {
@@ -146,6 +144,7 @@ module.exports.addProduct = async (req, res) => {
   }
 };
 
+//edit later
 module.exports.editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -218,7 +217,7 @@ module.exports.deleteProduct = async (req, res) => {
 
 module.exports.viewOrders = async (req, res) => {
   try {
-    const { id: merchantId } = req.params;
+    const merchantId = req.id;
 
     //1. All merchant's product exists in products model
     const products = await Product.find({ merchantId });
