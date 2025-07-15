@@ -3,12 +3,21 @@ const customerRoutes = require("./routes/customer.routes");
 const adminRoutes = require("./routes/admin.routes");
 const merchantRoutes = require("./routes/merchant.routes");
 
+
 const dbConnect = require("./config/db");
+const cors = require("cors");
+const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 require("dotenv").config();
 
 const auth = require("./middlewares/auth");
-const app = express();
 const PORT = 3000;
 
 app.use(express.json());

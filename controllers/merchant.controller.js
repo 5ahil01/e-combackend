@@ -6,12 +6,20 @@ const jwt = require("jsonwebtoken");
 
 module.exports.signup = async (req, res) => {
   try {
-    const { ownerName, email, password } = req.body;
+    const {
+      businessName,
+      ownerName,
+      email,
+      password,
+      phone,
+      gstNumber,
+      address
+    } = req.body;
 
-    if (!ownerName || !email || !password) {
+    if (!businessName || !ownerName || !email || !password || !phone) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "All required fields (businessName, ownerName, email, password, phone) must be provided",
       });
     }
 
@@ -25,9 +33,13 @@ module.exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newMerchant = await Merchant.create({
+      businessName,
       ownerName,
       email,
       password: hashedPassword,
+      phone,
+      gstNumber,
+      address
     });
 
     res.status(201).json({
@@ -35,8 +47,12 @@ module.exports.signup = async (req, res) => {
       message: "Merchant registered successfully",
       data: {
         id: newMerchant._id,
+        businessName: newMerchant.businessName,
         ownerName: newMerchant.ownerName,
         email: newMerchant.email,
+        phone: newMerchant.phone,
+        gstNumber: newMerchant.gstNumber,
+        address: newMerchant.address,
       },
     });
   } catch (error) {

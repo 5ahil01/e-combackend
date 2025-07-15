@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const merchantSchema = new mongoose.Schema({
-  // businessName: {
-  //   type: String,
-  //   required: true,
-  //   trim: true,
-  // },
+  businessName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   ownerName: {
     type: String,
     required: true,
@@ -23,22 +23,22 @@ const merchantSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  // phone: {
-  //   type: String,
-  //   required: true,
-  //   trim: true,
-  // },
-  // gstNumber: {
-  //   type: String,
-  //   required: false,
-  //   trim: true,
-  // },
-  // address: {
-  //   street: String,
-  //   city: String,
-  //   state: String,
-  //   zip: String,
-  // },
+  phone: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  gstNumber: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    zip: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

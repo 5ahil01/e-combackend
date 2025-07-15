@@ -41,6 +41,8 @@ module.exports.signup = async (req, res) => {
         email: newCustomer.email,
       },
     });
+
+    
   } catch (error) {
     res.status(500).json({
       success: false,
