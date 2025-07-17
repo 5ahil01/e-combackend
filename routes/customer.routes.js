@@ -16,9 +16,10 @@ const customerProtectedRoutes = express.Router();
 //Public Routes
 customerPublicRoutes.post("/signup", controller.signup);
 customerPublicRoutes.post("/login", controller.login);
+customerPublicRoutes.get("/products", controller.getProducts);
+
 
 //Protected Routes
-customerProtectedRoutes.get("/products", controller.getProducts);
 
 customerProtectedRoutes.get("/cart", controller.viewCart);
 

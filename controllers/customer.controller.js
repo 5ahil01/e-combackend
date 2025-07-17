@@ -32,17 +32,18 @@ module.exports.signup = async (req, res) => {
       address,
     });
 
+    console.log(newCustomer);
+
     res.status(201).json({
       success: true,
       message: "Customer created successfully",
       data: {
         id: newCustomer._id,
+        role: "customer",
         name: newCustomer.name,
         email: newCustomer.email,
       },
     });
-
-    
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -88,8 +89,10 @@ module.exports.login = async (req, res) => {
       message: "Login successful",
       data: {
         token: accessToken,
-        userId: customer._id,
+        id: customer._id,
+        role: "customer",
         name: customer.name,
+        email: customer.email,
       },
     });
   } catch (error) {
@@ -125,13 +128,14 @@ module.exports.getProducts = async (req, res) => {
     }
 
     const products = await Product.find(filter).sort(sortOption);
-
+    console.log("Products send")
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully",
       products,
     });
   } catch (error) {
+     console.log("Error hai");
     res.status(500).json({
       success: false,
       message: "Server error",

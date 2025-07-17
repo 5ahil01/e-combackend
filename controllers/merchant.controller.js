@@ -13,13 +13,14 @@ module.exports.signup = async (req, res) => {
       password,
       phone,
       gstNumber,
-      address
+      address,
     } = req.body;
 
     if (!businessName || !ownerName || !email || !password || !phone) {
       return res.status(400).json({
         success: false,
-        message: "All required fields (businessName, ownerName, email, password, phone) must be provided",
+        message:
+          "All required fields (businessName, ownerName, email, password, phone) must be provided",
       });
     }
 
@@ -39,14 +40,17 @@ module.exports.signup = async (req, res) => {
       password: hashedPassword,
       phone,
       gstNumber,
-      address
+      address,
     });
+
+    console.log(newMerchant);
 
     res.status(201).json({
       success: true,
       message: "Merchant registered successfully",
       data: {
         id: newMerchant._id,
+        role: "merchant",
         businessName: newMerchant.businessName,
         ownerName: newMerchant.ownerName,
         email: newMerchant.email,
@@ -106,9 +110,11 @@ module.exports.login = async (req, res) => {
       success: true,
       message: "Login successful",
       data: {
+        id: merchant._id,
         token: accessToken,
-        merchantId: merchant._id,
-        ownerName: merchant.ownerName,
+        role: "merchant",
+        name: merchant.ownerName,
+        email: merchant.email,
       },
     });
   } catch (error) {
